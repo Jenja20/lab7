@@ -48,35 +48,39 @@ function getQuakes() {
 } //getQuakes()
 
 function addQuakeMarkers(quakes, map) {
-    
-    //loop over the quakes array and add a marker for each quake
-    var quake;      //current quake data
-       
-    for (var idx = 0; idx < quakes.length; ++idx) {
-        quake = quakes[idx];
+    var quake;
+    var idx;
 
-        quake.mapMarker = new google.maps.Marker({
-		    map: map,
-		    position: new google.maps.LatLng(quake.location.latitude, quake.location.longitude)
-		});
+    for (idx = 0; idx < quakes.length; ++idx) {
+            quake = quakes[idx];
 
-		google.maps.event.addListener(quake.mapMarker, 'click', function(){
-		    if(gov.usgs.iw) {
-		    	gov.usgs.iw.close();
-		    }
+        //fixed function to find location and puts into infobox
+        if (quake.location.longitude && quake.location.latitude) {
+            var lat = quake.location.latitude;
+            var long = quake.location.longitude;
 
-		    //create an info window with the quake info
-			gov.usgs.iw = new google.maps.InfoWindow({
-			    content: new Date(quake.datetime).toLocaleString() + 
-			        ': magnitude ' + quake.magnitude + ' at depth of ' + 
-			        quake.depth + ' meters'
-			});
+            quake.mapMarker = new google.maps.Marker({
+                    map: map,
+                    position: new google.maps.LatLng(lat, long)
+            });
+		
+			infoWindow = new google.maps.InfoWindow({
+                    content: new Date(quake.datetime).toLocaleString() +
+                    ': magnitude ' + quake.magnitude + ' at depth of ' +
+                    quake.depth + ' meters'
+            });
 
-			//open the info window
-			gov.usgs.iw.open(map, this);
-	                    
-	    }); //click handler for marker
-    }
-} //addQuakeMarkers()
+            registerInfoWindow(map, quake.mapMarker, infoWindow);
 
+        }
+	}
+} //addquakemarkers
+
+function registerInfoWindow(map, marker, infoWindow) {
+    google.maps.event.addListener(marker, 'click', function(){
+    	gov.usgs.iw = infoWindow;
+
+        infoWindow.open(map, marker);
+    });                
+} //registerInfoWindow()
 
